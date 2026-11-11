@@ -1,0 +1,29 @@
+{
+  "name": "fidgettrack-native",
+  "main": "index.ts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "build:web": "node tools/build-native.mjs",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "validate": "node scripts/check-sdk.cjs",
+    "icons": "node scripts/make-icon.cjs"
+  },
+  "dependencies": {
+    "expo": "~57.0.31",
+    "expo-notifications": "~57.0.25",
+    "expo-splash-screen": "~57.0.10",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-webview": "13.16.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "~19.2.2",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3"
+  }
+}

@@ -1,0 +1,16 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.ipa
+*.apk
+*.aab
+ios/
+android/
+.DS_Store
+npm-debug.*
+*.orig.*
+.env*.local
+.claude/
+.secrets/
+expo-env.d.ts

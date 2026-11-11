@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#6366f1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="FidgetTrack" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<title>FidgetTrack</title>
+<style>
+:root{
+  --bg:#f4f5fb; --surface:#ffffff; --surface-2:#f0f1f8; --line:#e6e7f0;
+  --text:#1a1c2e; --muted:#6b6f87; --faint:#9397ad;
+  --brand:#6366f1; --brand-2:#8b5cf6; --brand-soft:#eef0ff;
+  --ok:#16a34a; --ok-soft:#e7f6ec; --warn:#d97706; --warn-soft:#fdf2e2;
+  --danger:#dc2626; --danger-soft:#fdeaea;
+  --shadow:0 1px 2px rgba(20,22,45,.06),0 8px 24px rgba(20,22,45,.06);
+  --shadow-lg:0 12px 40px rgba(20,22,45,.18);
+  --r:18px; --r-sm:12px;
+  --nav-h:64px;
+}
+:root[data-theme="dark"]{
+  --bg:#0f1117; --surface:#191c26; --surface-2:#21252f; --line:#2b2f3b;
+  --text:#eef0f6; --muted:#9aa0b4; --faint:#6b7186;
+  --brand:#818cf8; --brand-2:#a78bfa; --brand-soft:#22263a;
+  --ok:#34d399; --ok-soft:#14321f; --warn:#fbbf24; --warn-soft:#352711;
+  --danger:#f87171; --danger-soft:#3a1b1b;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  --shadow-lg:0 16px 50px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+  overscroll-behavior-y:none; -webkit-font-smoothing:antialiased;
+  line-height:1.45;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit;font-size:16px}
+img{display:block}
+.hidden{display:none !important}
+
+/* ---------- App shell ---------- */
+#app{max-width:680px;margin:0 auto;min-height:100%;position:relative}
+header.topbar{
+  position:sticky;top:0;z-index:40;
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  padding:calc(env(safe-area-inset-top) + 14px) 18px 12px;
+  display:flex;align-items:center;gap:12px;
+}
+.topbar .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.02em}
+.topbar .brand .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;box-shadow:var(--shadow)}
+.topbar .brand .logo svg{width:18px;height:18px}
+.topbar .spacer{flex:1}
+.iconbtn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--muted);background:var(--surface);box-shadow:var(--shadow)}
+.iconbtn:active{transform:scale(.94)}
+.iconbtn svg{width:20px;height:20px}
+
+main{padding:4px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 28px)}
+.screen{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+h2.section{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin:22px 4px 10px}
+.screen-title{font-size:27px;font-weight:800;letter-spacing:-.03em;margin:10px 4px 2px}
+.screen-sub{color:var(--muted);margin:0 4px 6px;font-size:14px}
+
+/* ---------- Cards / rows ---------- */
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.row{display:flex;align-items:center;gap:13px;padding:13px 14px;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+.row+.row{margin-top:10px}
+.thumb{width:52px;height:52px;border-radius:13px;object-fit:cover;background:var(--surface-2);flex-shrink:0}
+.thumb.ph{display:grid;place-items:center;color:var(--faint)}
+.thumb.ph svg{width:24px;height:24px}
+.grow{flex:1;min-width:0}
+.title-1{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-1{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.chev{color:var(--faint);flex-shrink:0}
+
+/* ---------- Stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 2px}
+.stat{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 12px;text-align:center}
+.stat .n{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.stat .l{font-size:11.5px;color:var(--muted);margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.stat.alert .n{color:var(--danger)}
+
+/* ---------- Badges / pills ---------- */
+.badge{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.badge.home{background:var(--ok-soft);color:var(--ok)}
+.badge.out{background:var(--brand-soft);color:var(--brand)}
+.badge.over{background:var(--danger-soft);color:var(--danger)}
+.badge.soon{background:var(--warn-soft);color:var(--warn)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* ---------- Fidget grid ---------- */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:4px}
+@media(min-width:520px){.grid{grid-template-columns:repeat(3,1fr)}}
+.gcard{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;text-align:left;display:flex;flex-direction:column;transition:transform .12s}
+.gcard:active{transform:scale(.97)}
+.gcard .ph-wrap{position:relative;aspect-ratio:1/1;background:var(--surface-2)}
+.gcard .ph-wrap img{width:100%;height:100%;object-fit:cover}
+.gcard .ph-wrap .empty{width:100%;height:100%;display:grid;place-items:center;color:var(--faint)}
+.gcard .ph-wrap .empty svg{width:34px;height:34px}
+.gcard .ph-wrap .status{position:absolute;top:8px;left:8px}
+.gcard .meta{padding:10px 11px 12px}
+.gcard .meta .nm{font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard .meta .who{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:15px;padding:13px 18px;border-radius:14px;background:var(--surface-2);color:var(--text);transition:transform .1s,filter .1s;width:100%}
+.btn:active{transform:scale(.97)}
+.btn svg{width:18px;height:18px}
+.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;box-shadow:0 6px 18px color-mix(in srgb,var(--brand) 40%,transparent)}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.ghost{background:transparent;color:var(--brand)}
+.btn.danger{background:var(--danger-soft);color:var(--danger)}
+.btn.sm{padding:9px 13px;font-size:13.5px;width:auto;border-radius:11px}
+.btn-row{display:flex;gap:10px;margin-top:14px}
+
+/* ---------- FAB ---------- */
+.fab{position:fixed;right:max(18px,calc((100vw - 680px)/2 + 18px));bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);z-index:45;
+  width:58px;height:58px;border-radius:20px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;display:grid;place-items:center;box-shadow:var(--shadow-lg)}
+.fab:active{transform:scale(.92)}
+.fab svg{width:26px;height:26px}
+
+/* ---------- Bottom nav ---------- */
+nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;height:calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);
+  background:color-mix(in srgb,var(--surface) 86%,transparent);
+  backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);
+  border-top:1px solid var(--line);display:flex;max-width:680px;margin:0 auto}
+nav.tabbar .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--faint);font-size:10.5px;font-weight:600;position:relative}
+nav.tabbar .tab svg{width:23px;height:23px}
+nav.tabbar .tab.active{color:var(--brand)}
+nav.tabbar .tab .scanbubble{width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;color:#fff;margin-top:-18px;box-shadow:var(--shadow-lg)}
+nav.tabbar .tab .scanbubble svg{width:24px;height:24px}
+
+/* ---------- Empty states ---------- */
+.empty-state{text-align:center;padding:52px 24px;color:var(--muted)}
+.empty-state .ico{width:76px;height:76px;border-radius:24px;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;margin:0 auto 16px;color:var(--brand)}
+.empty-state .ico svg{width:34px;height:34px}
+.empty-state h3{margin:0 0 6px;font-size:18px;color:var(--text)}
+.empty-state p{margin:0 auto 18px;max-width:280px;font-size:14px}
+
+/* ---------- Search ---------- */
+.searchbar{display:flex;align-items:center;gap:9px;background:var(--surface);border-radius:14px;padding:11px 14px;box-shadow:var(--shadow);margin:4px 0 14px}
+.searchbar svg{width:18px;height:18px;color:var(--faint);flex-shrink:0}
+.searchbar input{border:none;outline:none;background:none;color:var(--text);width:100%}
+
+/* ---------- Modal / sheet ---------- */
+.overlay{position:fixed;inset:0;z-index:100;background:rgba(10,12,24,.45);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+.overlay.show{opacity:1;pointer-events:auto}
+.sheet{width:100%;max-width:680px;max-height:92vh;overflow-y:auto;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom) + 26px);transform:translateY(100%);transition:transform .28s cubic-bezier(.22,1,.36,1);box-shadow:var(--shadow-lg)}
+.overlay.show .sheet{transform:none}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 14px}
+.sheet h3.sh-title{font-size:21px;font-weight:800;letter-spacing:-.02em;margin:0 4px 4px}
+.sheet .sh-sub{color:var(--muted);margin:0 4px 16px;font-size:14px}
+
+label.field{display:block;margin:0 4px 14px}
+label.field .lab{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:6px;display:block}
+.input{width:100%;border:1.5px solid var(--line);background:var(--surface);border-radius:13px;padding:13px 14px;color:var(--text);outline:none;transition:border-color .15s}
+.input:focus{border-color:var(--brand)}
+textarea.input{resize:vertical;min-height:62px}
+
+/* photo picker in sheet */
+.photo-pick{position:relative;aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;background:var(--surface-2);border:1.5px dashed var(--line);display:grid;place-items:center;margin:0 4px 16px;color:var(--muted)}
+.photo-pick img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.photo-pick .hint{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:14px;font-weight:600;z-index:1}
+.photo-pick .hint svg{width:30px;height:30px;color:var(--brand)}
+.photo-pick .change{position:absolute;bottom:10px;right:10px;z-index:2;background:rgba(0,0,0,.55);color:#fff;font-size:12.5px;font-weight:700;padding:7px 12px;border-radius:10px;backdrop-filter:blur(4px)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 4px 16px}
+.chip{padding:9px 14px;border-radius:12px;background:var(--surface);border:1.5px solid var(--line);font-size:13.5px;font-weight:600;color:var(--text)}
+.chip.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
+
+/* detail header */
+.detail-hero{position:relative;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin:6px 0 16px;aspect-ratio:1/1;max-height:300px;background:var(--surface-2)}
+.detail-hero img{width:100%;height:100%;object-fit:cover}
+.detail-hero .empty{width:100%;height:100%;display:grid;place-items:center;color:var(--faint)}
+.detail-hero .empty svg{width:56px;height:56px}
+.detail-hero .ov{position:absolute;left:0;right:0;bottom:0;padding:40px 16px 14px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff}
+.detail-hero .ov .nm{font-size:23px;font-weight:800;letter-spacing:-.02em}
+
+.kv{display:flex;align-items:center;gap:10px;padding:13px 14px}
+.kv .k{color:var(--muted);font-size:14px}
+.kv .v{margin-left:auto;font-weight:600;font-size:14px;text-align:right}
+.divide{height:1px;background:var(--line);margin:0 14px}
+
+/* history list */
+.hist{position:relative;padding-left:22px;margin:2px 6px}
+.hist .ev{position:relative;padding:4px 0 14px}
+.hist .ev::before{content:"";position:absolute;left:-16px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.hist .ev::after{content:"";position:absolute;left:-12px;top:16px;bottom:-4px;width:1.5px;background:var(--line)}
+.hist .ev:last-child::after{display:none}
+.hist .ev .t{font-weight:600;font-size:14px}
+.hist .ev .d{font-size:12.5px;color:var(--muted)}
+
+/* scan */
+.scan-stage{position:relative;aspect-ratio:3/4;max-height:52vh;border-radius:var(--r);overflow:hidden;background:#000;box-shadow:var(--shadow);margin:6px 0}
+.scan-stage video,.scan-stage img{width:100%;height:100%;object-fit:cover}
+.scan-stage .reticle{position:absolute;inset:14%;border:2.5px solid rgba(255,255,255,.75);border-radius:22px;pointer-events:none;box-shadow:0 0 0 2000px rgba(0,0,0,.18)}
+.scan-stage .hint{position:absolute;left:0;right:0;bottom:14px;text-align:center;color:#fff;font-size:13.5px;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.scan-controls{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:6px}
+.shutter{width:66px;height:66px;border-radius:50%;background:#fff;border:4px solid var(--brand);display:grid;place-items:center;box-shadow:var(--shadow)}
+.shutter:active{transform:scale(.92)}
+.shutter .inner{width:48px;height:48px;border-radius:50%;background:var(--brand)}
+.match-row .pct{font-weight:800;font-size:15px;color:var(--brand);width:46px;text-align:right}
+.match-bar{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;margin-top:6px}
+.match-bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 18px);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(92%,440px);transform:translateX(-50%)}
+.toast{background:var(--text);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:600;font-size:14px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;animation:toastIn .3s ease;max-width:100%}
+.toast svg{width:18px;height:18px;flex-shrink:0}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.settings-row{display:flex;align-items:center;gap:13px;padding:15px 15px}
+.settings-row .grow{flex:1}
+.settings-row .t{font-weight:600;font-size:15px}
+.settings-row .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+.switch{width:50px;height:30px;border-radius:999px;background:var(--line);position:relative;transition:background .2s;flex-shrink:0}
+.switch.on{background:var(--brand)}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.switch.on::after{transform:translateX(20px)}
+
+.banner{display:flex;gap:12px;align-items:center;padding:14px 15px;border-radius:var(--r);margin:4px 0 2px}
+.banner.warn{background:var(--warn-soft);color:var(--warn)}
+.banner.info{background:var(--brand-soft);color:var(--brand)}
+.banner svg{width:22px;height:22px;flex-shrink:0}
+.banner .bt{font-size:13.5px;font-weight:600;line-height:1.35}
+.banner .bt b{display:block;font-size:14.5px}
+
+select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239397ad' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></span>
+      FidgetTrack
+    </div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="themeBtn" title="Theme" aria-label="Toggle theme"></button>
+    <button class="iconbtn" id="settingsBtn" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+  </header>
+  <main id="view"></main>
+  <nav class="tabbar" id="tabbar"></nav>
+</div>
+
+<button class="fab hidden" id="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+
+<div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
+<div id="toast"></div>
+
+<!-- hidden file input for photo capture -->
+<input type="file" id="fileCam" accept="image/*" capture="environment" class="hidden" />
+<input type="file" id="fileImport" accept="application/json,.json" class="hidden" />
+
+<script>
+"use strict";
+/* ============================================================
+   FidgetTrack — fully offline fidget lending tracker
+   Data: IndexedDB. Photos: compressed dataURLs. Match: dHash.
+   ============================================================ */
+
+/* ---------- tiny helpers ---------- */
+const $ = (s,r=document)=>r.querySelector(s);
+const el = (t,p={})=>Object.assign(document.createElement(t),p);
+const uid = ()=> (crypto.randomUUID ? crypto.randomUUID() : 'id'+Date.now()+Math.random().toString(16).slice(2));
+const esc = s => (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAY = 86400000;
+const now = ()=>Date.now();
+
+/* icons (inline so everything is offline) */
+const I = {
+  fidget:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="5.5" cy="8" r="2.3"/><circle cx="18.5" cy="8" r="2.3"/><circle cx="12" cy="19" r="2.3"/><path d="M12 9v-2M10 13.6 6.9 9.7M14 13.6l3.1-3.9M12 15v1.8"/></svg>',
+  people:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11"/></svg>',
+  person:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>',
+  scan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+  cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  hand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>',
+};
+
+/* ============================================================
+   IndexedDB layer
+   ============================================================ */
+let DB=null;
+function openDB(){
+  return new Promise((res,rej)=>{
+    const r = indexedDB.open('fidgettrack',1);
+    r.onupgradeneeded = e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains('fidgets')) db.createObjectStore('fidgets',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('people')) db.createObjectStore('people',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('loans')) db.createObjectStore('loans',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('kv')) db.createObjectStore('kv',{keyPath:'k'});
+    };
+    r.onsuccess=()=>{DB=r.result;res(DB)};
+    r.onerror=()=>rej(r.error);
+  });
+}
+function tx(store,mode='readonly'){ return DB.transaction(store,mode).objectStore(store); }
+function idbAll(store){ return new Promise((res,rej)=>{const r=tx(store).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);}); }
+function idbPut(store,v){ return new Promise((res,rej)=>{const r=tx(store,'readwrite').put(v);r.onsuccess=()=>res(v);r.onerror=()=>rej(r.error);}); }
+function idbDel(store,k){ return new Promise((res,rej)=>{const r=tx(store,'readwrite').delete(k);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);}); }
+function idbGet(store,k){ return new Promise((res,rej)=>{const r=tx(store).get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}); }
+
+/* in-memory cache (kept in sync) */
+const S = { fidgets:[], people:[], loans:[], settings:{theme:'auto',notify:false,lead:1} };
+
+async function loadAll(){
+  const [f,p,l] = await Promise.all([idbAll('fidgets'),idbAll('people'),idbAll('loans')]);
+  S.fidgets=f; S.people=p; S.loans=l;
+  const st = await idbGet('kv','settings');
+  if(st) S.settings = Object.assign(S.settings, st.val);
+}
+function saveSettings(){ return idbPut('kv',{k:'settings',val:S.settings}); }
+
+/* ---------- derived ---------- */
+const personById = id => S.people.find(p=>p.id===id);
+const fidgetById = id => S.fidgets.find(f=>f.id===id);
+const openLoan = fid => S.loans.find(l=>l.fidgetId===fid && l.status==='out');
+const loansOut = ()=> S.loans.filter(l=>l.status==='out').sort((a,b)=>(a.dueAt||9e15)-(b.dueAt||9e15));
+const personHolds = pid => S.loans.filter(l=>l.personId===pid && l.status==='out');
+function fidgetStatus(f){
+  const l = openLoan(f.id);
+  if(!l) return {state:'home',loan:null,person:null};
+  const over = l.dueAt && l.dueAt < startOfDay(now());
+  const soon = l.dueAt && !over && l.dueAt <= now()+ (S.settings.lead*DAY) + DAY;
+  return {state: over?'over': soon?'soon':'out', loan:l, person:personById(l.personId)};
+}
+
+/* ---------- dates ---------- */
+function startOfDay(t){const d=new Date(t);d.setHours(0,0,0,0);return d.getTime();}
+function fmtDate(t){ if(!t) return '—'; const d=new Date(t); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+function relDue(t){
+  if(!t) return {txt:'no due date',cls:''};
+  const d0=startOfDay(t), today=startOfDay(now());
+  const diff=Math.round((d0-today)/DAY);
+  if(diff<0) return {txt: diff===-1?'1 day overdue':`${-diff} days overdue`, cls:'over'};
+  if(diff===0) return {txt:'due today', cls:'soon'};
+  if(diff===1) return {txt:'due tomorrow', cls:'soon'};
+  if(diff<=S.settings.lead+1) return {txt:`due in ${diff} days`, cls:'soon'};
+  return {txt:`due ${new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'})}`, cls:''};
+}
+function ago(t){
+  const s=Math.floor((now()-t)/1000);
+  if(s<60) return 'just now';
+  if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago';
+  const d=Math.floor(s/86400);
+  if(d<30) return d+'d ago';
+  return new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+}
+
+/* ============================================================
+   Image: compress + perceptual hash (dHash 8x8)
+   ============================================================ */
+function loadImg(src){ return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=src;}); }
+
+async function processPhoto(file){
+  const url = await new Promise((res)=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file);});
+  const img = await loadImg(url);
+  // compress: fit within 900px, cover-crop to square-ish is not needed; keep aspect
+  const max=900, scale=Math.min(1,max/Math.max(img.width,img.height));
+  const w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+  const c=el('canvas',{width:w,height:h});
+  c.getContext('2d').drawImage(img,0,0,w,h);
+  const photo = c.toDataURL('image/jpeg',0.82);
+  const hash = dHash(img);
+  return {photo,hash};
+}
+function dHash(img){
+  const w=9,h=8;
+  const c=el('canvas',{width:w,height:h});
+  const ctx=c.getContext('2d');
+  ctx.drawImage(img,0,0,w,h);
+  const d=ctx.getImageData(0,0,w,h).data;
+  let bits='';
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w-1;x++){
+      const i=(y*w+x)*4, j=(y*w+x+1)*4;
+      const g1=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+      const g2=0.299*d[j]+0.587*d[j+1]+0.114*d[j+2];
+      bits += (g1<g2)?'1':'0';
+    }
+  }
+  // 64 bits -> 16 hex
+  let hex='';
+  for(let i=0;i<64;i+=4) hex += parseInt(bits.slice(i,i+4),2).toString(16);
+  return hex;
+}
+function hamming(a,b){
+  if(!a||!b||a.length!==b.length) return 64;
+  let dist=0;
+  for(let i=0;i<a.length;i++){
+    let x = parseInt(a[i],16) ^ parseInt(b[i],16);
+    while(x){ dist += x&1; x>>=1; }
+  }
+  return dist;
+}
+
+/* ============================================================
+   Toast
+   ============================================================ */
+function toast(msg, kind='ok'){
+  const t=el('div',{className:'toast'});
+  const ic = kind==='ok'?I.check: kind==='bell'?I.bell : '';
+  t.innerHTML = ic + '<span>'+esc(msg)+'</span>';
+  $('#toast').appendChild(t);
+  setTimeout(()=>{t.style.transition='opacity .3s';t.style.opacity='0';setTimeout(()=>t.remove(),300);},2600);
+}
+
+/* ============================================================
+   Modal / sheet
+   ============================================================ */
+function openSheet(html){
+  $('#sheet').innerHTML = '<div class="grab"></div>'+html;
+  $('#overlay').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeSheet(){
+  $('#overlay').classList.remove('show');
+  document.body.style.overflow='';
+}
+$('#overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeSheet(); });
+
+/* ============================================================
+   Router
+   ============================================================ */
+let route = {name:'home', param:null};
+const TABS = [
+  {id:'home', label:'Home', icon:I.home},
+  {id:'fidgets', label:'Fidgets', icon:I.fidget},
+  {id:'scan', label:'Scan', icon:I.scan, center:true},
+  {id:'people', label:'People', icon:I.people},
+  {id:'alerts', label:'Reminders', icon:I.bell},
+];
+function go(name,param=null){
+  if(route.name==='scan' && name!=='scan') stopCamera();
+  route={name,param};
+  render();
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function render(){
+  renderTabs();
+  const v=$('#view');
+  const tabRoots=['home','fidgets','people','alerts','scan'];
+  const base = tabRoots.includes(route.name)? route.name : null;
+  if(route.name==='home') v.innerHTML=viewHome();
+  else if(route.name==='fidgets') v.innerHTML=viewFidgets();
+  else if(route.name==='people') v.innerHTML=viewPeople();
+  else if(route.name==='alerts') v.innerHTML=viewAlerts();
+  else if(route.name==='scan'){ v.innerHTML=viewScan(); initScan(); }
+  else if(route.name==='fidget') v.innerHTML=viewFidgetDetail(route.param);
+  else if(route.name==='personDetail') v.innerHTML=viewPersonDetail(route.param);
+  // FAB
+  const fab=$('#fab');
+  if(route.name==='fidgets'){ fab.classList.remove('hidden'); fab.onclick=()=>fidgetForm(); }
+  else if(route.name==='people'){ fab.classList.remove('hidden'); fab.onclick=()=>personForm(); }
+  else fab.classList.add('hidden');
+  bindDynamic();
+}
+function renderTabs(){
+  const nav=$('#tabbar');
+  const activeRoot = route.name==='fidget'?'fidgets': route.name==='personDetail'?'people': route.name;
+  nav.innerHTML = TABS.map(t=>{
+    const on = t.id===activeRoot;
+    if(t.center) return `<button class="tab ${on?'active':''}" data-tab="${t.id}"><span class="scanbubble">${t.icon}</span></button>`;
+    return `<button class="tab ${on?'active':''}" data-tab="${t.id}">${t.icon}<span>${t.label}</span></button>`;
+  }).join('');
+  nav.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(b.dataset.tab));
+}
+
+/* ============================================================
+   Views
+   ============================================================ */
+function statusBadge(st){
+  if(st.state==='home') return `<span class="badge home"><span class="dot"></span>Home</span>`;
+  if(st.state==='over') return `<span class="badge over"><span class="dot"></span>Overdue</span>`;
+  if(st.state==='soon') return `<span class="badge soon"><span class="dot"></span>Due soon</span>`;
+  return `<span class="badge out"><span class="dot"></span>Lent out</span>`;
+}
+
+function viewHome(){
+  const out = loansOut();
+  const overdue = out.filter(l=>l.dueAt && l.dueAt<startOfDay(now()));
+  const total=S.fidgets.length;
+  let h = `<div class="screen">`;
+  h += `<div class="screen-title">Hey there 👋</div>`;
+  h += `<p class="screen-sub">Here's who has your fidgets right now.</p>`;
+  h += `<div class="stats">
+    <div class="stat"><div class="n">${total}</div><div class="l">Fidgets</div></div>
+    <div class="stat"><div class="n">${out.length}</div><div class="l">Lent out</div></div>
+    <div class="stat ${overdue.length?'alert':''}"><div class="n">${overdue.length}</div><div class="l">Overdue</div></div>
+  </div>`;
+
+  if(total===0){
+    h += emptyState(I.fidget,'No fidgets yet','Add your 3D-printed fidgets with a photo, then log who borrows each one.', 'Add your first fidget','addFidget');
+    return h+`</div>`;
+  }
+
+  if(overdue.length){
+    h += `<h2 class="section">Needs collecting</h2>`;
+    h += overdue.map(loanRow).join('');
+  }
+  const soon = out.filter(l=>!overdue.includes(l) && l.dueAt && l.dueAt <= now()+(S.settings.lead+1)*DAY);
+  if(soon.length){
+    h += `<h2 class="section">Due soon</h2>`;
+    h += soon.map(loanRow).join('');
+  }
+  const rest = out.filter(l=>!overdue.includes(l) && !soon.includes(l));
+  if(rest.length){
+    h += `<h2 class="section">Out with people</h2>`;
+    h += rest.map(loanRow).join('');
+  }
+  if(out.length===0){
+    h += `<div class="card" style="padding:26px;text-align:center;margin-top:12px"><div style="color:var(--ok);font-weight:700">All fidgets are home 🎉</div><div style="color:var(--muted);font-size:13.5px;margin-top:4px">Nothing is lent out right now.</div></div>`;
+  }
+  return h+`</div>`;
+}
+
+function loanRow(l){
+  const f=fidgetById(l.fidgetId), p=personById(l.personId);
+  if(!f||!p) return '';
+  const r=relDue(l.dueAt);
+  const thumb = f.photo?`<img class="thumb" src="${f.photo}" alt="">`:`<div class="thumb ph">${I.fidget}</div>`;
+  return `<div class="row" data-open-fidget="${f.id}">
+    ${thumb}
+    <div class="grow">
+      <div class="title-1">${esc(f.name)}</div>
+      <div class="sub-1">with <b>${esc(p.name)}</b> · ${esc(r.txt)}</div>
+    </div>
+    <button class="btn ok sm" data-return="${l.id}" style="flex-shrink:0">${I.check}Got it</button>
+  </div>`;
+}
+
+function viewFidgets(){
+  let h=`<div class="screen"><div class="screen-title">Fidgets</div>`;
+  if(S.fidgets.length===0){
+    h += emptyState(I.fidget,'No fidgets yet','Snap a photo of each 3D-printed fidget so you can scan to identify it later.','Add a fidget','addFidget');
+    return h+`</div>`;
+  }
+  h += `<div class="searchbar">${I.search}<input id="fSearch" placeholder="Search fidgets…" autocomplete="off"></div>`;
+  h += `<div class="grid" id="fGrid">`+ fidgetCards(S.fidgets) +`</div></div>`;
+  return h;
+}
+function fidgetCards(list){
+  if(!list.length) return `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px">No matches.</div>`;
+  return list.map(f=>{
+    const st=fidgetStatus(f);
+    const img = f.photo?`<img src="${f.photo}" alt="">`:`<div class="empty">${I.fidget}</div>`;
+    const who = st.state==='home'?'At home':'With '+esc(st.person?st.person.name:'?');
+    return `<button class="gcard" data-open-fidget="${f.id}">
+      <div class="ph-wrap">${img}<div class="status">${statusBadge(st)}</div></div>
+      <div class="meta"><div class="nm">${esc(f.name)}</div><div class="who">${who}</div></div>
+    </button>`;
+  }).join('');
+}
+
+function viewPeople(){
+  let h=`<div class="screen"><div class="screen-title">People</div>`;
+  if(S.people.length===0){
+    h += emptyState(I.people,'No people yet','Add the people you lend fidgets to so every loan has a name on it.','Add a person','addPerson');
+    return h+`</div>`;
+  }
+  h += `<p class="screen-sub">${S.people.length} ${S.people.length===1?'person':'people'}</p>`;
+  const sorted=[...S.people].sort((a,b)=>a.name.localeCompare(b.name));
+  h += sorted.map(p=>{
+    const holds=personHolds(p.id);
+    const over=holds.filter(l=>l.dueAt&&l.dueAt<startOfDay(now())).length;
+    const sub = holds.length? `${holds.length} fidget${holds.length>1?'s':''}${over?` · ${over} overdue`:''}` : 'nothing out';
+    return `<div class="row" data-open-person="${p.id}">
+      <div class="thumb ph" style="background:var(--brand-soft);color:var(--brand)">${I.person}</div>
+      <div class="grow"><div class="title-1">${esc(p.name)}</div><div class="sub-1" style="${over?'color:var(--danger)':''}">${sub}</div></div>
+      <span class="chev">${I.chev}</span>
+    </div>`;
+  }).join('');
+  return h+`</div>`;
+}
+
+function viewAlerts(){
+  const out=loansOut();
+  const overdue=out.filter(l=>l.dueAt&&l.dueAt<startOfDay(now()));
+  const soon=out.filter(l=>!overdue.includes(l)&&l.dueAt&&l.dueAt<=now()+(S.settings.lead+1)*DAY);
+  let h=`<div class="screen"><div class="screen-title">Reminders</div>`;
+
+  // notification banner
+  if(!S.settings.notify){
+    h += `<div class="banner info" id="notifBanner">${I.bell}<div class="bt"><b>Turn on reminders</b>Get a notification when a fidget is due back.</div></div>
+      <button class="btn primary" id="enableNotif" style="margin:10px 0 6px">${I.bell}Enable notifications</button>`;
+  } else {
+    h += `<div class="banner info">${I.check}<div class="bt"><b>Reminders are on</b>You'll be alerted on or after a due date while the app is open. Install to your home screen for background checks.</div></div>`;
+  }
+
+  if(out.length===0){
+    h += `<div class="card" style="padding:30px;text-align:center;margin-top:14px"><div style="color:var(--ok);font-weight:700;font-size:16px">Nothing to collect 🎉</div><div style="color:var(--muted);font-size:13.5px;margin-top:4px">Every fidget is accounted for.</div></div>`;
+    return h+`</div>`;
+  }
+  if(overdue.length){ h+=`<h2 class="section" style="color:var(--danger)">Overdue — collect now</h2>`; h+=overdue.map(reminderRow).join(''); }
+  if(soon.length){ h+=`<h2 class="section">Coming up</h2>`; h+=soon.map(reminderRow).join(''); }
+  const later=out.filter(l=>!overdue.includes(l)&&!soon.includes(l));
+  if(later.length){ h+=`<h2 class="section">Later</h2>`; h+=later.map(reminderRow).join(''); }
+  return h+`</div>`;
+}
+function reminderRow(l){
+  const f=fidgetById(l.fidgetId),p=personById(l.personId);
+  if(!f||!p) return '';
+  const r=relDue(l.dueAt);
+  const thumb=f.photo?`<img class="thumb" src="${f.photo}">`:`<div class="thumb ph">${I.fidget}</div>`;
+  return `<div class="row">
+    ${thumb}
+    <div class="grow">
+      <div class="title-1">${esc(f.name)}</div>
+      <div class="sub-1">with <b>${esc(p.name)}</b> · <span style="color:${r.cls==='over'?'var(--danger)':r.cls==='soon'?'var(--warn)':'var(--muted)'};font-weight:600">${esc(r.txt)}</span></div>
+    </div>
+    <button class="btn ok sm" data-return="${l.id}" style="flex-shrink:0">${I.check}Collected</button>
+  </div>`;
+}
+
+function viewFidgetDetail(id){
+  const f=fidgetById(id); if(!f) return `<div class="screen"><p>Not found.</p></div>`;
+  const st=fidgetStatus(f);
+  const hero = f.photo?`<img src="${f.photo}" alt="">`:`<div class="empty">${I.fidget}</div>`;
+  const history=[...S.loans.filter(l=>l.fidgetId===id)].sort((a,b)=>b.lentAt-a.lentAt);
+  let h=`<div class="screen">
+    <button class="btn ghost sm" style="margin:2px 0 6px;padding-left:4px" onclick="go('fidgets')">${I.back}Fidgets</button>
+    <div class="detail-hero">${hero}<div class="ov"><div class="nm">${esc(f.name)}</div><div style="margin-top:6px">${statusBadge(st)}</div></div></div>`;
+
+  if(st.loan){
+    const r=relDue(st.loan.dueAt);
+    h+=`<div class="card" style="margin-bottom:14px">
+      <div class="kv"><span class="k">Who has it</span><span class="v">${esc(st.person.name)}</span></div><div class="divide"></div>
+      <div class="kv"><span class="k">Lent</span><span class="v">${fmtDate(st.loan.lentAt)} · ${ago(st.loan.lentAt)}</span></div><div class="divide"></div>
+      <div class="kv"><span class="k">Due back</span><span class="v" style="${r.cls==='over'?'color:var(--danger)':''}">${esc(r.txt)}</span></div>
+      ${st.loan.note?`<div class="divide"></div><div class="kv"><span class="k">Note</span><span class="v" style="font-weight:400">${esc(st.loan.note)}</span></div>`:''}
+    </div>
+    <div class="btn-row">
+      <button class="btn ok" data-return="${st.loan.id}">${I.check}Mark collected</button>
+      <button class="btn" data-remind="${st.loan.id}" style="flex:0 0 auto">${I.bell}Remind</button>
+    </div>`;
+  } else {
+    h+=`<button class="btn primary" data-lend="${f.id}">${I.hand}Lend this out</button>`;
+  }
+  if(f.notes){ h+=`<h2 class="section">Notes</h2><div class="card" style="padding:14px;color:var(--muted);font-size:14.5px">${esc(f.notes)}</div>`; }
+
+  h+=`<h2 class="section">History</h2>`;
+  if(history.length){
+    h+=`<div class="hist">`+history.map(l=>{
+      const p=personById(l.personId);
+      const ret = l.returnedAt?`Returned by ${esc(p?p.name:'?')} · ${fmtDate(l.returnedAt)}`:`Out with ${esc(p?p.name:'?')} · since ${fmtDate(l.lentAt)}`;
+      return `<div class="ev"><div class="t">${l.returnedAt?'Returned':'Lent out'}</div><div class="d">${ret}</div></div>`;
+    }).join('')+`</div>`;
+  } else h+=`<div class="card" style="padding:16px;color:var(--muted);font-size:14px">Never lent out yet.</div>`;
+
+  h+=`<div class="btn-row" style="margin-top:22px">
+    <button class="btn" data-edit-fidget="${f.id}">${I.edit}Edit</button>
+    <button class="btn danger" data-del-fidget="${f.id}" style="flex:0 0 auto">${I.trash}</button>
+  </div></div>`;
+  return h;
+}
+
+function viewPersonDetail(id){
+  const p=personById(id); if(!p) return `<div class="screen"><p>Not found.</p></div>`;
+  const holds=personHolds(id);
+  const past=[...S.loans.filter(l=>l.personId===id&&l.status==='returned')].sort((a,b)=>b.returnedAt-a.returnedAt);
+  let h=`<div class="screen">
+    <button class="btn ghost sm" style="margin:2px 0 6px;padding-left:4px" onclick="go('people')">${I.back}People</button>
+    <div style="display:flex;align-items:center;gap:14px;margin:6px 4px 16px">
+      <div style="width:64px;height:64px;border-radius:20px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center">${I.person}</div>
+      <div><div style="font-size:24px;font-weight:800;letter-spacing:-.02em">${esc(p.name)}</div>
+      <div style="color:var(--muted);font-size:14px">${holds.length?`holding ${holds.length} fidget${holds.length>1?'s':''}`:'nothing out right now'}</div></div>
+    </div>`;
+  h+=`<button class="btn primary" data-lend-to="${p.id}">${I.hand}Lend a fidget to ${esc(p.name)}</button>`;
+  if(p.notes) h+=`<div class="card" style="padding:14px;color:var(--muted);font-size:14px;margin-top:12px">${esc(p.notes)}</div>`;
+
+  if(holds.length){
+    h+=`<h2 class="section">Currently has</h2>`;
+    h+=holds.map(l=>{
+      const f=fidgetById(l.fidgetId); const r=relDue(l.dueAt);
+      const thumb=f.photo?`<img class="thumb" src="${f.photo}">`:`<div class="thumb ph">${I.fidget}</div>`;
+      return `<div class="row" data-open-fidget="${f.id}">${thumb}<div class="grow"><div class="title-1">${esc(f.name)}</div><div class="sub-1" style="color:${r.cls==='over'?'var(--danger)':'var(--muted)'}">${esc(r.txt)}</div></div><button class="btn ok sm" data-return="${l.id}">${I.check}</button></div>`;
+    }).join('');
+  }
+  h+=`<h2 class="section">Borrowing history</h2>`;
+  if(past.length){
+    h+=`<div class="hist">`+past.map(l=>{const f=fidgetById(l.fidgetId);return `<div class="ev"><div class="t">${esc(f?f.name:'?')}</div><div class="d">Returned ${fmtDate(l.returnedAt)} · borrowed ${fmtDate(l.lentAt)}</div></div>`;}).join('')+`</div>`;
+  } else h+=`<div class="card" style="padding:16px;color:var(--muted);font-size:14px">No past loans.</div>`;
+
+  h+=`<div class="btn-row" style="margin-top:22px">
+    <button class="btn" data-edit-person="${p.id}">${I.edit}Edit</button>
+    <button class="btn danger" data-del-person="${p.id}" style="flex:0 0 auto">${I.trash}</button>
+  </div></div>`;
+  return h;
+}
+
+function emptyState(icon,title,text,btnLabel,action){
+  return `<div class="empty-state"><div class="ico">${icon}</div><h3>${title}</h3><p>${text}</p>
+    <button class="btn primary" style="max-width:260px;margin:0 auto" data-action="${action}">${btnLabel}</button></div>`;
+}
+
+/* ============================================================
+   Scan (camera + photo match)
+   ============================================================ */
+let camStream=null, scanMode='camera';
+function viewScan(){
+  const hasCam = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  return `<div class="screen">
+    <div class="screen-title">Scan a fidget</div>
+    <p class="screen-sub">Point at a fidget and snap — I'll match it to your collection and show who has it.</p>
+    <div class="scan-stage" id="scanStage">
+      <video id="cam" autoplay playsinline muted></video>
+      <div class="reticle"></div>
+      <div class="hint" id="scanHint">${hasCam?'Center the fidget, then tap the shutter':'Tap below to take or choose a photo'}</div>
+    </div>
+    <div class="scan-controls">
+      <button class="shutter" id="shutterBtn"><span class="inner"></span></button>
+    </div>
+    <div style="text-align:center;margin-top:8px"><button class="btn ghost sm" id="pickPhotoBtn">${I.cam} Use a photo instead</button></div>
+    <div id="scanResult"></div>
+  </div>`;
+}
+async function initScan(){
+  const video=$('#cam'); const hint=$('#scanHint');
+  const hasCam = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  $('#shutterBtn').onclick = ()=> scanMode==='camera'&&camStream ? captureFromVideo() : $('#fileCam').click();
+  $('#pickPhotoBtn').onclick = ()=> $('#fileCam').click();
+  if(!hasCam){ video.classList.add('hidden'); return; }
+  try{
+    camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+    video.srcObject=camStream; scanMode='camera';
+  }catch(err){
+    video.classList.add('hidden');
+    hint.textContent='Camera blocked — tap the shutter to pick a photo';
+    scanMode='file';
+  }
+}
+function stopCamera(){ if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; } }
+async function captureFromVideo(){
+  const v=$('#cam');
+  if(!v||!v.videoWidth){ $('#fileCam').click(); return; }
+  const c=el('canvas',{width:v.videoWidth,height:v.videoHeight});
+  c.getContext('2d').drawImage(v,0,0);
+  const url=c.toDataURL('image/jpeg',0.85);
+  const img=await loadImg(url);
+  showMatches(dHash(img), url);
+}
+async function handleScanFile(file){
+  const {photo,hash}=await processPhoto(file);
+  showMatches(hash,photo);
+}
+function showMatches(hash, previewUrl){
+  stopCamera();
+  const stage=$('#scanStage');
+  if(stage) stage.innerHTML=`<img src="${previewUrl}" alt=""><div class="hint">Your scan</div>`;
+  const scored=S.fidgets.filter(f=>f.hash).map(f=>({f,d:hamming(hash,f.hash)}))
+    .sort((a,b)=>a.d-b.d);
+  const res=$('#scanResult');
+  if(!scored.length){
+    res.innerHTML=`<div class="card" style="padding:18px;margin-top:14px;text-align:center;color:var(--muted)">No photographed fidgets to match against yet.<br><button class="btn primary sm" style="margin-top:12px" data-action="addFidget">Add a fidget</button></div>`;
+    bindDynamic(); return;
+  }
+  const top=scored.slice(0,4);
+  const best=top[0];
+  const bestPct=Math.round((64-best.d)/64*100);
+  let h=`<h2 class="section">${bestPct>=78?'Best match':'Closest matches — tap to confirm'}</h2>`;
+  h+=top.map((s,i)=>{
+    const pct=Math.round((64-s.d)/64*100);
+    const st=fidgetStatus(s.f);
+    const thumb=s.f.photo?`<img class="thumb" src="${s.f.photo}">`:`<div class="thumb ph">${I.fidget}</div>`;
+    const who = st.state==='home'?'At home':'With '+esc(st.person?st.person.name:'?');
+    return `<div class="row match-row" data-open-fidget="${s.f.id}" style="${i===0?'border:2px solid var(--brand)':''}">
+      ${thumb}
+      <div class="grow"><div class="title-1">${esc(s.f.name)}</div><div class="sub-1">${who}</div>
+        <div class="match-bar"><i style="width:${pct}%"></i></div></div>
+      <span class="pct">${pct}%</span>
+    </div>`;
+  }).join('');
+  h+=`<button class="btn ghost" style="margin-top:14px" data-rescan="1">${I.scan} Scan again</button>`;
+  res.innerHTML=h;
+  bindDynamic();
+}
+
+/* ============================================================
+   Forms: fidget / person / lend
+   ============================================================ */
+let draftPhoto=null, draftHash=null, photoTarget=null; // photoTarget: 'fidget' | 'scan'
+
+function fidgetForm(existing){
+  const f = existing||{};
+  draftPhoto = f.photo||null; draftHash = f.hash||null; photoTarget='fidget';
+  const img = draftPhoto?`<img src="${draftPhoto}" id="ppImg">`:'';
+  openSheet(`
+    <h3 class="sh-title">${existing?'Edit fidget':'New fidget'}</h3>
+    <p class="sh-sub">A clear photo lets you scan to identify it later.</p>
+    <div class="photo-pick" id="photoPick">
+      ${img}
+      <div class="hint" ${draftPhoto?'style="display:none"':''}>${I.cam}<span>Take or choose a photo</span></div>
+      <div class="change" ${draftPhoto?'':'style="display:none"'}>Change photo</div>
+    </div>
+    <label class="field"><span class="lab">Name</span>
+      <input class="input" id="fName" placeholder="e.g. Blue hex spinner" value="${esc(f.name||'')}" maxlength="60"></label>
+    <label class="field"><span class="lab">Notes (optional)</span>
+      <textarea class="input" id="fNotes" placeholder="Colour, size, which print…">${esc(f.notes||'')}</textarea></label>
+    <div class="btn-row">
+      <button class="btn" onclick="closeSheet()">Cancel</button>
+      <button class="btn primary" id="saveFidget">${existing?'Save':'Add fidget'}</button>
+    </div>
+  `);
+  $('#photoPick').onclick=()=>{ photoTarget='fidget'; $('#fileCam').click(); };
+  $('#saveFidget').onclick=async()=>{
+    const name=$('#fName').value.trim();
+    if(!name){ $('#fName').focus(); toast('Give it a name','err'); return; }
+    const rec = existing? {...existing} : {id:uid(),createdAt:now()};
+    rec.name=name; rec.notes=$('#fNotes').value.trim();
+    rec.photo=draftPhoto||null; rec.hash=draftHash||null;
+    await idbPut('fidgets',rec);
+    const i=S.fidgets.findIndex(x=>x.id===rec.id);
+    if(i>=0) S.fidgets[i]=rec; else S.fidgets.push(rec);
+    closeSheet(); toast(existing?'Fidget updated':'Fidget added');
+    if(existing && route.name==='fidget') render(); else go('fidgets');
+  };
+}
+
+function personForm(existing){
+  const p=existing||{};
+  openSheet(`
+    <h3 class="sh-title">${existing?'Edit person':'New person'}</h3>
+    <p class="sh-sub">Someone you lend fidgets to.</p>
+    <label class="field"><span class="lab">Name</span>
+      <input class="input" id="pName" placeholder="e.g. Jayden R." value="${esc(p.name||'')}" maxlength="50"></label>
+    <label class="field"><span class="lab">Notes (optional)</span>
+      <textarea class="input" id="pNotes" placeholder="Class, seat, how to reach them…">${esc(p.notes||'')}</textarea></label>
+    <div class="btn-row">
+      <button class="btn" onclick="closeSheet()">Cancel</button>
+      <button class="btn primary" id="savePerson">${existing?'Save':'Add person'}</button>
+    </div>
+  `);
+  setTimeout(()=>$('#pName')&&$('#pName').focus(),250);
+  $('#savePerson').onclick=async()=>{
+    const name=$('#pName').value.trim();
+    if(!name){ $('#pName').focus(); return; }
+    const rec=existing?{...existing}:{id:uid(),createdAt:now()};
+    rec.name=name; rec.notes=$('#pNotes').value.trim();
+    await idbPut('people',rec);
+    const i=S.people.findIndex(x=>x.id===rec.id);
+    if(i>=0) S.people[i]=rec; else S.people.push(rec);
+    closeSheet(); toast(existing?'Person updated':'Person added');
+    if(existing && route.name==='personDetail') render(); else go('people');
+  };
+}
+
+function lendForm(fidgetId, personId){
+  if(S.fidgets.length===0){ toast('Add a fidget first','err'); return; }
+  const fixedF = fidgetId? fidgetById(fidgetId):null;
+  const fixedP = personId? personById(personId):null;
+  const avail = S.fidgets.filter(f=>!openLoan(f.id));
+  let selF = fidgetId|| (avail[0]&&avail[0].id) || '';
+  let selP = personId|| '';
+  let dueOffset = (S.settings.lead>0? 7 : 7); // default 1 week
+  const quickDays=[0,1,3,7,14];
+  const quickLabels={0:'Today',1:'Tomorrow',3:'3 days',7:'1 week',14:'2 weeks'};
+
+  function fOptions(){
+    const list = fidgetId? S.fidgets : avail;
+    if(!list.length) return `<option value="">No fidgets available</option>`;
+    return list.map(f=>`<option value="${f.id}" ${f.id===selF?'selected':''}>${esc(f.name)}</option>`).join('');
+  }
+  function pOptions(){
+    if(!S.people.length) return `<option value="">— add a person below —</option>`;
+    return `<option value="">Choose a person…</option>`+[...S.people].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${p.id}" ${p.id===selP?'selected':''}>${esc(p.name)}</option>`).join('');
+  }
+
+  openSheet(`
+    <h3 class="sh-title">Lend out</h3>
+    <p class="sh-sub">Log who's taking a fidget and when it's due back.</p>
+    ${fixedF?`<div class="row" style="margin-bottom:14px">${fixedF.photo?`<img class="thumb" src="${fixedF.photo}">`:`<div class="thumb ph">${I.fidget}</div>`}<div class="grow"><div class="title-1">${esc(fixedF.name)}</div><div class="sub-1">Lending this one</div></div></div>`:
+      `<label class="field"><span class="lab">Fidget</span><select class="input" id="lendF">${fOptions()}</select></label>`}
+    ${fixedP?`<input type="hidden" id="lendP" value="${fixedP.id}"><div class="row" style="margin-bottom:14px"><div class="thumb ph" style="background:var(--brand-soft);color:var(--brand)">${I.person}</div><div class="grow"><div class="title-1">${esc(fixedP.name)}</div><div class="sub-1">Borrowing</div></div></div>`:
+      `<label class="field"><span class="lab">Who's borrowing</span><select class="input" id="lendP">${pOptions()}</select></label>
+       <button class="btn ghost sm" id="quickAddPerson" style="margin:-8px 4px 14px">+ New person</button>`}
+    <label class="field"><span class="lab">Due back</span></label>
+    <div class="chips" id="dueChips">${quickDays.map(d=>`<button class="chip ${d===dueOffset?'on':''}" data-due="${d}">${quickLabels[d]}</button>`).join('')}
+      <button class="chip" data-due="custom">Pick date</button></div>
+    <input type="date" class="input hidden" id="dueCustom" style="margin:0 4px 14px">
+    <label class="field"><span class="lab">Note (optional)</span>
+      <input class="input" id="lendNote" placeholder="e.g. after math class"></label>
+    <div class="btn-row">
+      <button class="btn" onclick="closeSheet()">Cancel</button>
+      <button class="btn primary" id="doLend">${I.hand}Lend it</button>
+    </div>
+  `);
+
+  const chips=$('#dueChips');
+  chips.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    chips.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on');
+    if(c.dataset.due==='custom'){ $('#dueCustom').classList.remove('hidden'); $('#dueCustom').showPicker&&$('#dueCustom').showPicker(); dueOffset='custom'; }
+    else { $('#dueCustom').classList.add('hidden'); dueOffset=parseInt(c.dataset.due,10); }
+  });
+  if($('#lendF')) $('#lendF').onchange=e=>selF=e.target.value;
+  if($('#lendP')&&$('#lendP').tagName==='SELECT') $('#lendP').onchange=e=>selP=e.target.value;
+  if($('#quickAddPerson')) $('#quickAddPerson').onclick=()=>{ closeSheet(); setTimeout(()=>personFormThenLend(fidgetId),260); };
+
+  $('#doLend').onclick=async()=>{
+    const fId = fixedF? fidgetId : ($('#lendF')?$('#lendF').value:selF);
+    const pId = fixedP? fixedP.id : $('#lendP').value;
+    if(!fId){ toast('Pick a fidget','err'); return; }
+    if(!pId){ toast('Pick who is borrowing','err'); return; }
+    let dueAt=null;
+    if(dueOffset==='custom'){ const v=$('#dueCustom').value; if(v){ const d=new Date(v+'T20:00'); dueAt=d.getTime(); } }
+    else { dueAt = startOfDay(now()) + dueOffset*DAY + 20*3600000; } // due end-of-day
+    const loan={id:uid(),fidgetId:fId,personId:pId,lentAt:now(),dueAt,note:$('#lendNote').value.trim(),status:'out',returnedAt:null,lastNotified:null};
+    await idbPut('loans',loan); S.loans.push(loan);
+    closeSheet();
+    const p=personById(pId), f=fidgetById(fId);
+    toast(`${f.name} → ${p.name}`);
+    scheduleReminders();
+    if(route.name==='fidget') render(); else if(route.name==='personDetail') render(); else go('home');
+  };
+}
+// helper: add a person, then reopen lend with them selected
+async function personFormThenLend(fidgetId){
+  openSheet(`
+    <h3 class="sh-title">New person</h3>
+    <label class="field"><span class="lab">Name</span><input class="input" id="pName" placeholder="Name" maxlength="50"></label>
+    <div class="btn-row"><button class="btn" onclick="closeSheet()">Cancel</button><button class="btn primary" id="savePerson">Add & continue</button></div>`);
+  setTimeout(()=>$('#pName')&&$('#pName').focus(),250);
+  $('#savePerson').onclick=async()=>{
+    const name=$('#pName').value.trim(); if(!name) return;
+    const rec={id:uid(),name,notes:'',createdAt:now()};
+    await idbPut('people',rec); S.people.push(rec);
+    closeSheet(); setTimeout(()=>lendForm(fidgetId,rec.id),260);
+  };
+}
+
+/* ---------- return a loan ---------- */
+async function returnLoan(loanId){
+  const l=S.loans.find(x=>x.id===loanId); if(!l||l.status!=='out') return;
+  l.status='returned'; l.returnedAt=now();
+  await idbPut('loans',l);
+  const f=fidgetById(l.fidgetId);
+  toast(`${f?f.name:'Fidget'} collected ✓`);
+  render();
+}
+
+/* ============================================================
+   Reminders / notifications
+   ============================================================ */
+function dueReminders(){
+  const t=now();
+  return S.loans.filter(l=>l.status==='out' && l.dueAt && l.dueAt<=t);
+}
+async function enableNotifications(){
+  if(!('Notification' in window)){ toast('Notifications not supported here','err'); return; }
+  let perm=Notification.permission;
+  if(perm==='default') perm=await Notification.requestPermission();
+  if(perm==='granted'){
+    S.settings.notify=true; await saveSettings();
+    toast('Reminders on ✓','bell');
+    // best-effort periodic background sync
+    try{
+      const reg=await navigator.serviceWorker.ready;
+      if('periodicSync' in reg){
+        const st=await navigator.permissions.query({name:'periodic-background-sync'}).catch(()=>({state:'denied'}));
+        if(st.state==='granted') await reg.periodicSync.register('fidget-reminders',{minInterval:12*3600*1000}).catch(()=>{});
+      }
+    }catch(e){}
+    scheduleReminders();
+    render();
+  } else {
+    toast('Notifications blocked','err');
+  }
+}
+let reminderTimer=null;
+function scheduleReminders(){
+  if(reminderTimer) clearTimeout(reminderTimer);
+  checkReminders();
+  // re-check every 15 min while app is open
+  reminderTimer=setTimeout(scheduleReminders,15*60*1000);
+}
+function checkReminders(){
+  if(!S.settings.notify || Notification.permission!=='granted') return;
+  const due=dueReminders();
+  const t=now();
+  due.forEach(l=>{
+    // notify once per day per loan
+    if(l.lastNotified && (t-l.lastNotified)<20*3600*1000) return;
+    const f=fidgetById(l.fidgetId), p=personById(l.personId);
+    if(!f||!p) return;
+    const r=relDue(l.dueAt);
+    try{
+      navigator.serviceWorker.ready.then(reg=>{
+        reg.showNotification('Collect your fidget',{
+          body:`"${f.name}" is ${r.txt} — ${p.name} has it.`,
+          icon:'icon-192.png', badge:'icon-192.png', tag:'loan-'+l.id, renotify:true,
+          data:{loanId:l.id}
+        });
+      });
+    }catch(e){
+      try{ new Notification('Collect your fidget',{body:`"${f.name}" — ${p.name} has it (${r.txt}).`}); }catch(_){}
+    }
+    l.lastNotified=t; idbPut('loans',l);
+  });
+}
+
+/* ============================================================
+   Settings sheet
+   ============================================================ */
+function settingsSheet(){
+  const dark = currentTheme();
+  openSheet(`
+    <h3 class="sh-title">Settings</h3>
+    <div class="card" style="margin-bottom:14px">
+      <div class="settings-row"><div class="grow"><div class="t">Dark mode</div><div class="s">Easier on the eyes</div></div>
+        <div class="switch ${dark==='dark'?'on':''}" id="swDark"></div></div>
+      <div class="divide"></div>
+      <div class="settings-row"><div class="grow"><div class="t">Reminders</div><div class="s">Notify when a fidget is due back</div></div>
+        <div class="switch ${S.settings.notify?'on':''}" id="swNotif"></div></div>
+      <div class="divide"></div>
+      <label class="settings-row" style="cursor:pointer"><div class="grow"><div class="t">Remind me</div><div class="s">How early to flag due fidgets</div></div>
+        <select class="input" id="leadSel" style="width:auto">
+          <option value="0" ${S.settings.lead===0?'selected':''}>On due day</option>
+          <option value="1" ${S.settings.lead===1?'selected':''}>1 day before</option>
+          <option value="2" ${S.settings.lead===2?'selected':''}>2 days before</option>
+          <option value="3" ${S.settings.lead===3?'selected':''}>3 days before</option>
+        </select></label>
+    </div>
+    <h2 class="section" style="margin-left:4px">Your data (stays on this device)</h2>
+    <div class="card" style="margin-bottom:14px">
+      <button class="settings-row" id="exportBtn" style="width:100%;text-align:left"><div style="color:var(--brand)">${I.box}</div><div class="grow"><div class="t">Back up to a file</div><div class="s">Save fidgets, people & photos as JSON</div></div><span class="chev">${I.chev}</span></button>
+      <div class="divide"></div>
+      <button class="settings-row" id="importBtn" style="width:100%;text-align:left"><div style="color:var(--brand)">${I.box}</div><div class="grow"><div class="t">Restore from a backup</div><div class="s">Import a .json backup file</div></div><span class="chev">${I.chev}</span></button>
+    </div>
+    <button class="btn danger" id="wipeBtn" style="margin-top:4px">${I.trash}Erase everything</button>
+    <p style="text-align:center;color:var(--faint);font-size:12px;margin-top:18px">FidgetTrack · works 100% offline · v1</p>
+  `);
+  $('#swDark').onclick=()=>{ setTheme(currentTheme()==='dark'?'light':'dark'); $('#swDark').classList.toggle('on'); };
+  $('#swNotif').onclick=async()=>{ if(S.settings.notify){ S.settings.notify=false; await saveSettings(); $('#swNotif').classList.remove('on'); } else { closeSheet(); enableNotifications(); } };
+  $('#leadSel').onchange=async e=>{ S.settings.lead=parseInt(e.target.value,10); await saveSettings(); };
+  $('#exportBtn').onclick=exportData;
+  $('#importBtn').onclick=()=>$('#fileImport').click();
+  $('#wipeBtn').onclick=confirmWipe;
+}
+
+async function exportData(){
+  const data={app:'fidgettrack',version:1,exportedAt:now(),fidgets:S.fidgets,people:S.people,loans:S.loans};
+  const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+  const a=el('a',{href:URL.createObjectURL(blob),download:`fidgettrack-backup-${new Date().toISOString().slice(0,10)}.json`});
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('Backup downloaded');
+}
+async function importData(file){
+  try{
+    const text=await file.text(); const data=JSON.parse(text);
+    if(data.app!=='fidgettrack') { toast('Not a FidgetTrack backup','err'); return; }
+    if(!confirm('Restore this backup? It will replace your current data.')) return;
+    await Promise.all(['fidgets','people','loans'].map(s=>new Promise(r=>{const req=tx(s,'readwrite').clear();req.onsuccess=r;req.onerror=r;})));
+    for(const f of data.fidgets||[]) await idbPut('fidgets',f);
+    for(const p of data.people||[]) await idbPut('people',p);
+    for(const l of data.loans||[]) await idbPut('loans',l);
+    await loadAll(); closeSheet(); go('home'); toast('Backup restored ✓');
+  }catch(e){ toast('Could not read that file','err'); }
+}
+async function confirmWipe(){
+  if(!confirm('Erase ALL fidgets, people and history on this device? This cannot be undone.')) return;
+  await Promise.all(['fidgets','people','loans'].map(s=>new Promise(r=>{const req=tx(s,'readwrite').clear();req.onsuccess=r;req.onerror=r;})));
+  S.fidgets=[];S.people=[];S.loans=[]; closeSheet(); go('home'); toast('Everything erased');
+}
+
+/* ============================================================
+   Theme
+   ============================================================ */
+function currentTheme(){
+  const t=S.settings.theme;
+  if(t==='dark'||t==='light') return t;
+  return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+}
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',currentTheme());
+  $('#themeBtn').innerHTML = currentTheme()==='dark'?I.sun:I.moon;
+  const meta=document.querySelector('meta[name=theme-color]');
+  if(meta) meta.content = currentTheme()==='dark'?'#191c26':'#6366f1';
+}
+async function setTheme(t){ S.settings.theme=t; await saveSettings(); applyTheme(); }
+
+/* ============================================================
+   Dynamic event binding (after each render)
+   ============================================================ */
+function bindDynamic(){
+  document.querySelectorAll('[data-open-fidget]').forEach(e=>e.onclick=ev=>{ if(ev.target.closest('[data-return]'))return; go('fidget',e.dataset.openFidget); });
+  document.querySelectorAll('[data-open-person]').forEach(e=>e.onclick=()=>go('personDetail',e.dataset.openPerson));
+  document.querySelectorAll('[data-return]').forEach(e=>e.onclick=ev=>{ev.stopPropagation();returnLoan(e.dataset.return);});
+  document.querySelectorAll('[data-lend]').forEach(e=>e.onclick=()=>lendForm(e.dataset.lend));
+  document.querySelectorAll('[data-lend-to]').forEach(e=>e.onclick=()=>lendForm(null,e.dataset.lendTo));
+  document.querySelectorAll('[data-remind]').forEach(e=>e.onclick=()=>remindNow(e.dataset.remind));
+  document.querySelectorAll('[data-edit-fidget]').forEach(e=>e.onclick=()=>fidgetForm(fidgetById(e.dataset.editFidget)));
+  document.querySelectorAll('[data-del-fidget]').forEach(e=>e.onclick=()=>delFidget(e.dataset.delFidget));
+  document.querySelectorAll('[data-edit-person]').forEach(e=>e.onclick=()=>personForm(personById(e.dataset.editPerson)));
+  document.querySelectorAll('[data-del-person]').forEach(e=>e.onclick=()=>delPerson(e.dataset.delPerson));
+  document.querySelectorAll('[data-rescan]').forEach(e=>e.onclick=()=>go('scan'));
+  document.querySelectorAll('[data-action]').forEach(e=>e.onclick=()=>{
+    const a=e.dataset.action;
+    if(a==='addFidget') fidgetForm();
+    else if(a==='addPerson') personForm();
+  });
+  const en=$('#enableNotif'); if(en) en.onclick=enableNotifications;
+  const s=$('#fSearch');
+  if(s) s.oninput=()=>{ const q=s.value.toLowerCase().trim(); const list=S.fidgets.filter(f=>f.name.toLowerCase().includes(q)||(f.notes||'').toLowerCase().includes(q)); $('#fGrid').innerHTML=fidgetCards(list); bindDynamic(); };
+}
+function remindNow(loanId){
+  const l=S.loans.find(x=>x.id===loanId); if(!l) return;
+  const f=fidgetById(l.fidgetId),p=personById(l.personId);
+  if(S.settings.notify && Notification.permission==='granted'){
+    navigator.serviceWorker.ready.then(reg=>reg.showNotification('Collect your fidget',{body:`"${f.name}" — ${p.name} has it.`,icon:'icon-192.png',tag:'loan-'+l.id,renotify:true}));
+    toast('Reminder sent','bell');
+  } else {
+    toast('Enable reminders in Settings first','err');
+  }
+}
+async function delFidget(id){
+  const f=fidgetById(id);
+  if(openLoan(id)){ toast('It\'s lent out — collect it first','err'); return; }
+  if(!confirm(`Delete "${f.name}" and its history?`)) return;
+  await idbDel('fidgets',id);
+  const rel=S.loans.filter(l=>l.fidgetId===id);
+  for(const l of rel) await idbDel('loans',l.id);
+  S.fidgets=S.fidgets.filter(x=>x.id!==id);
+  S.loans=S.loans.filter(x=>x.fidgetId!==id);
+  toast('Fidget deleted'); go('fidgets');
+}
+async function delPerson(id){
+  if(personHolds(id).length){ toast('They still have fidgets out','err'); return; }
+  const p=personById(id);
+  if(!confirm(`Delete "${p.name}"?`)) return;
+  await idbDel('people',id);
+  S.people=S.people.filter(x=>x.id!==id);
+  // keep their returned loans but they'll show '?'; simpler to drop person-returned loans
+  toast('Person deleted'); go('people');
+}
+
+/* ============================================================
+   File inputs
+   ============================================================ */
+$('#fileCam').addEventListener('change',async e=>{
+  const file=e.target.files[0]; e.target.value='';
+  if(!file) return;
+  if(photoTarget==='fidget'){
+    toast('Processing photo…');
+    const {photo,hash}=await processPhoto(file);
+    draftPhoto=photo; draftHash=hash;
+    const pick=$('#photoPick');
+    if(pick){ pick.innerHTML=`<img src="${photo}" id="ppImg"><div class="change">Change photo</div>`; }
+  } else { // scan
+    await handleScanFile(file);
+  }
+});
+$('#fileImport').addEventListener('change',e=>{ const f=e.target.files[0]; e.target.value=''; if(f) importData(f); });
+
+/* route photoTarget correctly when scanning via file */
+document.addEventListener('click',e=>{
+  if(e.target.closest('#pickPhotoBtn')||e.target.closest('#shutterBtn')&&scanMode!=='camera') photoTarget='scan';
+},true);
+
+/* ============================================================
+   Header buttons
+   ============================================================ */
+$('#themeBtn').onclick=()=>setTheme(currentTheme()==='dark'?'light':'dark');
+$('#settingsBtn').onclick=settingsSheet;
+window.go=go; window.closeSheet=closeSheet;
+
+/* re-check reminders when app regains focus */
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checkReminders(); if(['home','alerts'].includes(route.name)) render(); } });
+
+/* ============================================================
+   Boot
+   ============================================================ */
+(async function boot(){
+  await openDB();
+  await loadAll();
+  applyTheme();
+  render();
+  if(S.settings.notify) scheduleReminders();
+  if('serviceWorker' in navigator){
+    try{ await navigator.serviceWorker.register('sw.js'); }catch(e){}
+  }
+})();
+</script>
+</body>
+</html>

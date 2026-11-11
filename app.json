@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "FidgetTrack",
+    "slug": "fidgettrack",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "fidgettrack",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#f4f5fb",
+    "icon": "./assets/icon.png",
+    "ios": {
+      "bundleIdentifier": "com.solyapps.fidgettrack",
+      "supportsTablet": true,
+      "requireFullScreen": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "FidgetTrack uses the camera to photograph your fidgets and to scan one to see who has it. Photos stay on this device.",
+        "NSPhotoLibraryUsageDescription": "FidgetTrack lets you pick a photo of a fidget from your library. Photos stay on this device."
+      }
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#f4f5fb",
+          "image": "./assets/icon.png",
+          "imageWidth": 160
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#6366f1"
+        }
+      ]
+    ],
+    "owner": "solomonsasson"
+  }
+}
