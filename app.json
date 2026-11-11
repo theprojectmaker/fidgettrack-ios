@@ -35,6 +35,11 @@
         }
       ]
     ],
-    "owner": "solomonsasson"
+    "owner": "solomonsasson",
+    "extra": {
+      "eas": {
+        "projectId": "0d3f9a10-cc50-4e18-a094-f439c2038a16"
+      }
+    }
   }
 }
