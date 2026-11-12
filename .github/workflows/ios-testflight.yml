@@ -1,9 +1,14 @@
 # Builds the iOS app on a free GitHub macOS runner with `eas build --local` (no Expo build quota) and sends it to TestFlight.
-# Run it from GitHub: Actions > "iOS build to TestFlight" > Run workflow.
+# AUTOMATIC: every push to main (except doc-only changes) builds and ships to TestFlight. Build numbers auto-increment (eas.json).
+# You can also run it by hand: Actions > "iOS build to TestFlight" > Run workflow.
 # Needs one repository secret: EXPO_TOKEN (expo.dev > Account settings > Access tokens).
 name: iOS build to TestFlight
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
   workflow_dispatch:
     inputs:
       submit:
@@ -50,5 +55,5 @@ jobs:
           path: ${{ runner.temp }}/app.ipa
           retention-days: 7
       - name: Send to TestFlight
-        if: ${{ inputs.submit }}
+        if: ${{ github.event_name == 'push' || inputs.submit }}
         run: npx --yes eas-cli@latest submit --platform ios --profile production --path "$RUNNER_TEMP/app.ipa" --non-interactive --wait
