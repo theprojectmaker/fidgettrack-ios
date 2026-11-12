@@ -32,7 +32,7 @@ const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a
 
 // opts: fullBleed (gradient background) or transparent (white glyph only)
 function renderAt(M, opts) {
-  const top = [0x63, 0x66, 0xf1], bot = [0x8b, 0x5c, 0xf6], white = [255, 255, 255];
+  const top = [0x24, 0x57, 0xd6], bot = [0x24, 0x57, 0xd6], white = [255, 255, 255]; // flat blue, no gradient
   const px = new Uint8ClampedArray(M * M * 4);
   const c = M / 2;
   const hubR = M * 0.085, lobeR = M * 0.135, dist = M * 0.19, bearR = M * 0.034, lobeHoleR = M * 0.052;
@@ -71,4 +71,12 @@ const make = (N, opts) => png(N, downscale(renderAt(N * 2, opts), N * 2, N));
 
 fs.writeFileSync(path.join(OUT, 'icon.png'), make(1024, { transparent: false }));
 fs.writeFileSync(path.join(OUT, 'notification-icon.png'), make(96, { transparent: true }));
-console.log('Wrote assets/icon.png (1024) and assets/notification-icon.png (96)');
+fs.writeFileSync(path.join(OUT, 'splash-icon.png'), make(512, { transparent: true }));
+console.log('Wrote assets/icon.png (1024), notification-icon.png (96), splash-icon.png (512)');
+// The web app (tests/fidgettrack) uses the same mark for its home-screen icons.
+const pwa = path.join(__dirname, '..', '..', 'fidgettrack');
+if (fs.existsSync(pwa)) {
+  fs.writeFileSync(path.join(pwa, 'icon-512.png'), make(512, { transparent: false }));
+  fs.writeFileSync(path.join(pwa, 'icon-192.png'), make(192, { transparent: false }));
+  console.log('Wrote ../fidgettrack/icon-192.png and icon-512.png');
+}

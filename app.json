@@ -2,11 +2,11 @@
   "expo": {
     "name": "FidgetTrack",
     "slug": "fidgettrack",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "scheme": "fidgettrack",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#f4f5fb",
+    "backgroundColor": "#f2f2f7",
     "icon": "./assets/icon.png",
     "ios": {
       "bundleIdentifier": "com.solyapps.fidgettrack",
@@ -22,16 +22,16 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#f4f5fb",
-          "image": "./assets/icon.png",
-          "imageWidth": 160
+          "backgroundColor": "#2457d6",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180
         }
       ],
       [
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#6366f1"
+          "color": "#2457d6"
         }
       ]
     ],

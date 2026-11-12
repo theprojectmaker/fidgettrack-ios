@@ -11,15 +11,18 @@ when the app is closed — no server, still fully offline.
 
 ## Layout
 - `web/index.html` — the actual app (identical to the `tests/fidgettrack` PWA).
-- `tools/build-native.mjs` — injects the native bridge and emits `src/page.js` (committed).
+- `tools/build-native.mjs` — drops the PWA-only head links and emits `src/page.js` (committed). The page itself detects the native shell.
 - `src/page.js` — the app as a string the WebView loads (generated; don't edit by hand).
 - `App.tsx` — the WebView shell + the notification bridge.
 - `src/reminders.ts` — pure reminder-planning logic (unit-tested in `tests/`).
 - `.github/workflows/ios-testflight.yml` — free GitHub macOS build → TestFlight.
 
 ## Bridge (web ⇄ native)
-- Web → native: `reminders` (snapshot to schedule), `requestNotifications`, `notifQuery`, `remindNow`.
+- Web → native: `reminders` (snapshot: enabled, leadMin, fidgets, people, loans), `requestNotifications`, `notifQuery`.
 - Native → web: `notifState` (permission), `openFidget` (tapped a reminder).
+- Reminders are planned in `src/reminders.ts`: one notification at each due time (plus an optional early one),
+  then nudges 10, 30, 60, 120, 240, 480 and 1440 minutes later while the fidget is still out. Times are
+  absolute, so re-syncing never fires anything new.
 
 ## Commands
 ```
