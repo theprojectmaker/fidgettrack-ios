@@ -5,5 +5,5 @@
     "preview": { "distribution": "internal" },
     "production": { "autoIncrement": true }
   },
-  "submit": { "production": { "ios": { "ascAppId": "REPLACE_AFTER_FIRST_SUBMIT" } } }
+  "submit": { "production": { "ios": { "ascAppId": "6833761678" } } }
 }
